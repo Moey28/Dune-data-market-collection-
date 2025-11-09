@@ -1,9 +1,9 @@
-name: Run Dune Query (Soccer)
+name: Run Dune SQL (All Sports)
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 * * * *"   # hourly; change as you like
+    - cron: "0 * * * *"  # hourly
 
 jobs:
   run-dune:
@@ -13,7 +13,7 @@ jobs:
       actions: read
     env:
       DUNE_API_KEY: ${{ secrets.DUNE_API_KEY }}
-      DUNE_QUERY_ID: ${{ vars.DUNE_QUERY_ID }}
+      DUNE_SQL: ${{ vars.DUNE_SQL }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,14 +28,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests
 
-      - name: Run Dune query and save results
+      - name: Run Dune SQL and save results
         run: |
-          python scripts/run_dune.py
+          python scripts/run_dune_sql.py
 
       - name: Upload CSV as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: dune-soccer-export
+          name: dune-export
           path: data/*.csv
           if-no-files-found: warn
 
@@ -44,5 +44,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/*.csv || true
-          git commit -m "auto: update soccer export $(date -u +'%Y-%m-%dT%H:%M:%SZ')" || echo "no changes"
+          git commit -m "auto: update dune export $(date -u +'%Y-%m-%dT%H:%M:%SZ')" || echo "no changes"
           git push || echo "no changes to push"
